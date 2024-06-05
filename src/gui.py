@@ -47,17 +47,22 @@ class MainWindow:
       for child in self.scrollFrame.viewPort.winfo_children():
          child.destroy()
          
+      fieldCount = 0
       # Get the selection and add fields
       self.selection = self.pdfList.selection()
-      fields = get_fields(self.selection)
-      for field in fields:
-         # Create data in the fieldData dict if it doesn't already exist
-         if field not in self.fieldData:
-            self.fieldData[field] = StringVar()
-            # New fields also only need to be added if this field hasn't been seen yet
-            row = len(self.fieldData) - 1
-            ttk.Label(self.scrollFrame.viewPort, text=field).grid(column=0, row=row, pady=2)
-            ttk.Entry(self.scrollFrame.viewPort, textvariable=self.fieldData[field]).grid(column=1, row=row, pady=2)
+      for i, pdf in enumerate(self.selection):
+         fields = get_fields(pdf, i)
+         fieldCount += len(fields)
+         for field in fields:
+            # Create data in the fieldData dict if it doesn't already exist
+            if field not in self.fieldData:
+               self.fieldData[field] = StringVar()
+               # New fields also only need to be added if this field hasn't been seen yet
+               row = len(self.fieldData) - 1
+               ttk.Label(self.scrollFrame.viewPort, text=field).grid(column=0, row=row, pady=2)
+               ttk.Entry(self.scrollFrame.viewPort, textvariable=self.fieldData[field]).grid(column=1, row=row, pady=2)
+      print(fieldCount)
+      print(len(self.fieldData))
 
    def add_pdf(self):
       messagebox.showinfo(message='Not Implemented')
