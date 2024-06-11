@@ -26,8 +26,11 @@ def get_forms():
       
    return forms
 
-def get_write_stream(filename):
-   file = path.join('output', filename)
+def get_write_stream(filename, subfolder=''):
+   partialPath = 'output'
+   if len(subfolder) > 0:
+      partialPath = path.join(partialPath, subfolder)
+   file = path.join(partialPath, filename)
    # Make sure the folder exists
    directory = path.dirname(file)
    if not path.exists(directory):

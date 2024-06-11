@@ -1,10 +1,9 @@
 from pypdf import PdfReader, PdfWriter
 from files import get_write_stream
-import field_names as ignore
 
 # import json
 
-def get_fields(filename, i=0):
+def get_fields(filename):
    reader = PdfReader(filename)
    fields = reader.get_fields()
    # with open('temp_' + str(i) + '.json', 'w') as outfile:
@@ -21,7 +20,7 @@ def get_fields(filename, i=0):
    # print(str(allFieldLen) + ' ' + str(formTextFieldLen))
    return fields
 
-def write_fields(filenames, data):
+def write_fields(filenames, data, folder=''):
    for file in filenames:
       reader = PdfReader(file)
       # We can only fill in forms page-by-page
@@ -60,5 +59,5 @@ def write_fields(filenames, data):
       #       auto_regenerate=False
       #    )
       
-      with get_write_stream(file) as output_stream:
+      with get_write_stream(file, subfolder=folder) as output_stream:
          writer.write(output_stream)

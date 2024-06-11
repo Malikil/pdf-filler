@@ -1,6 +1,12 @@
+import json
+
 __ignore = set()
+__rename = dict()
+__init = False
 
 def init():
+   global __init, __rename
+
    try:
       with open('ignore.cfg') as cfg:
          for line in cfg.readlines():
@@ -8,13 +14,36 @@ def init():
    except:
       print('Failed to load ignore.cfg')
 
-def get():
+   try:
+      with open('rename.json') as cfg:
+         __rename = json.load(cfg)
+   except:
+      print('Failed to load rename.json')
+
+   __init = True
+
+def get_ignore():
+   if not __init:
+      init()
    return set(__ignore)
 
-def add(item):
+def get_rename():
+   if not __init:
+      init()
+   return dict(__rename)
+
+def add_ignore(item):
    __ignore.add(item)
 
+def add_rename(item, name):
+   __rename[item] = name
+
 def save():
+   if not __init:
+      return
+   
    with open('ignore.cfg', 'w') as cfg:
       for s in __ignore:
          cfg.write(f"{s}\n")
+   with open('rename.json', 'w') as cfg:
+      json.dump(__rename, cfg)
