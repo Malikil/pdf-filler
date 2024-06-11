@@ -1,23 +1,24 @@
 from pypdf import PdfReader, PdfWriter
 from files import get_write_stream
+import field_names as ignore
 
-import json
+# import json
 
 def get_fields(filename, i=0):
    reader = PdfReader(filename)
    fields = reader.get_fields()
-   with open('temp_' + str(i) + '.json', 'w') as outfile:
-      fields = {k: v for k, v in fields.items() if '/FT' in v and v['/FT'] == '/Tx'}
-      json.dump(
-         fields,
-         outfile,
-         indent=4,
-         default=lambda v: str(v)
-      )
-   allFieldLen = len(fields)
-   fields = reader.get_form_text_fields()
-   formTextFieldLen = len(fields)
-   print(str(allFieldLen) + ' ' + str(formTextFieldLen))
+   # with open('temp_' + str(i) + '.json', 'w') as outfile:
+   fields = {k: v for k, v in fields.items() if '/FT' in v and v['/FT'] == '/Tx'}
+      # json.dump(
+      #    fields,
+      #    outfile,
+      #    indent=4,
+      #    default=lambda v: str(v)
+      # )
+   # allFieldLen = len(fields)
+   # fields = reader.get_form_text_fields()
+   # formTextFieldLen = len(fields)
+   # print(str(allFieldLen) + ' ' + str(formTextFieldLen))
    return fields
 
 def write_fields(filenames, data):

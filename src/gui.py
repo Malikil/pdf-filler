@@ -25,7 +25,7 @@ class MainWindow:
       self.pdfList.grid(column=0, row=0, rowspan=1, columnspan=2)
 
       # A button under the tree view to add custom pdfs
-      ttk.Button(frm, text='Add PDF', command=self.add_pdf).grid(column=0, row=1)
+      # ttk.Button(frm, text='Add PDF', command=self.add_pdf).grid(column=0, row=1)
       ttk.Button(frm, text='Load PDFs', command=self.get_selection).grid(column=1, row=1)
 
       # Set up a frame in a canvas so a scrollbar can be added
@@ -54,13 +54,22 @@ class MainWindow:
          fields = get_fields(pdf, i)
          fieldCount += len(fields)
          for field in fields:
+            # Use the tooltip string as the primary key
+            # Get tooltip string
+            ttString = (fields[field]['/TU'] if '/TU' in fields[field] else field).lower()
             # Create data in the fieldData dict if it doesn't already exist
-            if field not in self.fieldData:
-               self.fieldData[field] = StringVar()
+            if ttString not in self.fieldData:
+               # Create an initial data object. Leave out the field id here because it's added in both cases later
+               self.fieldData[ttString] = {
+                  "ids": [],
+                  "data": StringVar()
+               }
                # New fields also only need to be added if this field hasn't been seen yet
                row = len(self.fieldData) - 1
-               ttk.Label(self.scrollFrame.viewPort, text=field).grid(column=0, row=row, pady=2)
-               ttk.Entry(self.scrollFrame.viewPort, textvariable=self.fieldData[field]).grid(column=1, row=row, pady=2)
+               ttk.Label(self.scrollFrame.viewPort, text=ttString).grid(column=0, row=row, pady=2)
+               ttk.Entry(self.scrollFrame.viewPort, textvariable=self.fieldData[ttString]['data']).grid(column=1, row=row, pady=2)
+            # Add the current field to the id array of the appropriate data field
+            self.fieldData[ttString]['ids'].append(field)
       print(fieldCount)
       print(len(self.fieldData))
 
@@ -69,7 +78,12 @@ class MainWindow:
 
    def save_pdfs(self):
       # Convert StringVars to actual strings
-      data = {k: v.get() for k, v in self.fieldData.items()}
+      data = {}
+      for ttString in self.fieldData:
+         # Multiple field ids could be associated with this string. The list is stored as 'ids'
+         for fieldName in self.fieldData[ttString]['ids']:
+            # Convert the StringVar to a real string
+            data[fieldName] = self.fieldData[ttString]['data'].get()
       write_fields(self.selection, data)
       messagebox.showinfo('Saved', "PDFs Saved to 'output' folder")
 
