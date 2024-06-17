@@ -5,45 +5,53 @@ from files import get_forms
 from pdfs import get_fields, write_fields
 import field_names
 
-class MainWindow:
-   def __init__(self):
+class MainWindow(Tk):
+   def __init__(self, parent):
+      Tk.__init__(self, parent)
+      self.parent = parent
       self.selection = []
       self.fieldData = {}
-
+      self.initialize()
+      
+   def initialize(self):
       # GUI
-      self.root = Tk()
-      self.root.wm_title("Fill PDF")
-      frm = ttk.Frame(self.root, padding=10)
-      frm.grid()
+      self.grid()
+      self.configure(padx=10, pady=10)
+      # 5 Columns
+      for i in range(5):
+         self.grid_columnconfigure(i, weight=1)
+      # 2 Rows, but only the first should be expandable
+      self.grid_rowconfigure(0, weight=1)
+      self.grid_rowconfigure(1, weight=0)
 
-      self.pdfList = ttk.Treeview(frm, columns=('path'))
+      self.pdfList = ttk.Treeview(self, columns=('path'))
       self.pdfList.config(show='tree')
       #pdfList.column('path', width=1)
       # Insert items
       for listItem in get_forms():
          self.pdfList.insert(listItem['parent'], 'end', listItem['id'], text=listItem['name'])
 
-      self.pdfList.grid(column=0, row=0, rowspan=1, columnspan=2)
+      self.pdfList.grid(column=0, row=0, rowspan=1, columnspan=2, sticky='NSEW')
 
       # A button under the tree view to add custom pdfs
       # ttk.Button(frm, text='Add PDF', command=self.add_pdf).grid(column=0, row=1)
-      ttk.Button(frm, text='Load PDFs', command=self.get_selection).grid(column=1, row=1)
+      ttk.Button(self, text='Load PDFs', command=self.get_selection).grid(column=1, row=1)
 
       # Set up a frame in a canvas so a scrollbar can be added
-      fieldsFrm = ttk.Frame(frm, borderwidth=1, relief='sunken')
-      fieldsFrm.grid(column=2, row=0, columnspan=3)
+      fieldsFrm = ttk.Frame(self, borderwidth=1, relief='sunken')
+      fieldsFrm.grid(column=2, row=0, columnspan=3, sticky='NSEW')
       self.scrollFrame = ScrollFrame(fieldsFrm)
       # Make the canvas background the same color as frames
       s = ttk.Style()
       bg = s.lookup('TFrame', 'background')
       self.scrollFrame.viewPort.configure(background=bg)
-      self.scrollFrame.pack()
+      self.scrollFrame.pack(fill='both', expand=True)
 
       # Add controls under the data entry area
       self.outputLocation = StringVar()
-      ttk.Entry(frm, textvariable=self.outputLocation).grid(column=2, row=1)
-      ttk.Button(frm, text="Save", command=self.save_pdfs).grid(column=3, row=1)
-      ttk.Button(frm, text="Quit", command=self.quit).grid(column=4, row=1)
+      ttk.Entry(self, textvariable=self.outputLocation).grid(column=2, row=1)
+      ttk.Button(self, text="Save", command=self.save_pdfs).grid(column=3, row=1)
+      ttk.Button(self, text="Quit", command=self.quit).grid(column=4, row=1)
 
    def get_selection(self):
       ignoreList = field_names.get_ignore()
@@ -73,7 +81,7 @@ class MainWindow:
                }
                # New fields also only need to be added if this field hasn't been seen yet
                row = len(self.fieldData) - 1
-               ttk.Button(self.scrollFrame.viewPort, text='x', command=self.setup_ignore(fieldKey, row)).grid(column=0, row=row, pady=2)
+               ttk.Button(self.scrollFrame.viewPort, text='hide', command=self.setup_ignore(fieldKey, row)).grid(column=0, row=row, pady=2)
                ttk.Label(self.scrollFrame.viewPort, text=ttString).grid(column=1, row=row, pady=2)
                ttk.Entry(self.scrollFrame.viewPort, textvariable=self.fieldData[ttString]['data']).grid(column=2, row=row, pady=2)
             # Add the current field to the id array of the appropriate data field
@@ -104,11 +112,11 @@ class MainWindow:
       write_fields(self.selection, data, folder=self.outputLocation.get())
       messagebox.showinfo('Saved', "PDFs saved to output/" + self.outputLocation.get())
 
-   def mainloop(self):
-      self.root.mainloop()
-
    def quit(self):
-      self.root.destroy()
+      self.destroy()
       field_names.save()
 
-MainWindow().mainloop()
+if __name__ == '__main__':
+   app = MainWindow(None)
+   app.title('Fill PDF')
+   app.mainloop()
