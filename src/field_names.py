@@ -35,8 +35,8 @@ def get_rename():
 def add_ignore(item):
    __ignore.add(item)
 
-def add_rename(item, name):
-   __rename[item] = name
+def add_rename(prev, name):
+   __rename[prev] = name
 
 def save():
    if not __init:

@@ -1,10 +1,10 @@
 from tkinter import *
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 from scrollbar import ScrollFrame
 from files import get_forms
 from pdfs import get_fields, write_fields
 import field_names
-
+from input_gui import InputWindow
 
 class MainWindow(Tk):
    def __init__(self, parent):
@@ -104,7 +104,14 @@ class MainWindow(Tk):
          i.grid_forget()
 
    def setup_rename(self, fieldId, row):
-      pass
+      _id = fieldId
+      _r = row
+      return lambda: self.rename_field(_id, _r)
+
+   def rename_field(self, fieldId, row):
+      result = simpledialog.askstring('Rename', f'Rename `{fieldId}` to:')
+      if result is not None:
+         field_names.add_rename(fieldId, result)
 
    def add_pdf(self):
       messagebox.showinfo(message='Not Implemented')
