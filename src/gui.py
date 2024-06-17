@@ -5,6 +5,7 @@ from files import get_forms
 from pdfs import get_fields, write_fields
 import field_names
 
+
 class MainWindow(Tk):
    def __init__(self, parent):
       Tk.__init__(self, parent)
@@ -81,9 +82,13 @@ class MainWindow(Tk):
                }
                # New fields also only need to be added if this field hasn't been seen yet
                row = len(self.fieldData) - 1
-               ttk.Button(self.scrollFrame.viewPort, text='hide', command=self.setup_ignore(fieldKey, row)).grid(column=0, row=row, pady=2)
-               ttk.Label(self.scrollFrame.viewPort, text=ttString).grid(column=1, row=row, pady=2)
-               ttk.Entry(self.scrollFrame.viewPort, textvariable=self.fieldData[ttString]['data']).grid(column=2, row=row, pady=2)
+               ttk.Button(self.scrollFrame.viewPort, text='hide', command=self.setup_ignore(fieldKey, row))\
+                  .grid(column=0, row=row, pady=2)
+               ttk.Button(self.scrollFrame.viewPort, text='rename', command=self.setup_rename(fieldKey, row))\
+                  .grid(column=1, row=row, pady=2)
+               ttk.Label(self.scrollFrame.viewPort, text=ttString).grid(column=2, row=row, pady=2)
+               ttk.Entry(self.scrollFrame.viewPort, textvariable=self.fieldData[ttString]['data'])\
+                  .grid(column=3, row=row, pady=2)
             # Add the current field to the id array of the appropriate data field
             self.fieldData[ttString]['ids'].append(fieldKey)
 
@@ -97,6 +102,9 @@ class MainWindow(Tk):
       items = self.scrollFrame.viewPort.grid_slaves(row=row)
       for i in items:
          i.grid_forget()
+
+   def setup_rename(self, fieldId, row):
+      pass
 
    def add_pdf(self):
       messagebox.showinfo(message='Not Implemented')
