@@ -4,7 +4,7 @@ from scrollbar import ScrollFrame
 from files import get_forms
 from pdfs import get_fields, write_fields
 import field_names
-from input_gui import InputWindow
+from input_gui import askRename
 
 class MainWindow(Tk):
    def __init__(self, parent):
@@ -36,6 +36,7 @@ class MainWindow(Tk):
 
       # A button under the tree view to add custom pdfs
       # ttk.Button(frm, text='Add PDF', command=self.add_pdf).grid(column=0, row=1)
+      ttk.Button(self, text='Map Fields', command=self.map_fields).grid(column=0, row=1)
       ttk.Button(self, text='Load PDFs', command=self.get_selection).grid(column=1, row=1)
 
       # Set up a frame in a canvas so a scrollbar can be added
@@ -53,6 +54,15 @@ class MainWindow(Tk):
       ttk.Entry(self, textvariable=self.outputLocation).grid(column=2, row=1)
       ttk.Button(self, text="Save", command=self.save_pdfs).grid(column=3, row=1)
       ttk.Button(self, text="Quit", command=self.quit).grid(column=4, row=1)
+
+   def map_fields(self):
+      selection = self.pdfList.selection()
+      for pdf in selection:
+         fields = get_fields(pdf)
+         # Copy field id as a value for that field
+         fieldData = {fieldId: fieldId for fieldId in fields}
+         write_fields(selection, fieldData, folder='FieldMapping')
+         messagebox.showinfo('Saved', "Field names written to output/FieldMapping")
 
    def get_selection(self):
       ignoreList = field_names.get_ignore()
@@ -98,10 +108,11 @@ class MainWindow(Tk):
       return lambda: self.add_ignore(_id, _r)
 
    def add_ignore(self, fieldId, row):
-      field_names.add_ignore(fieldId)
-      items = self.scrollFrame.viewPort.grid_slaves(row=row)
-      for i in items:
-         i.grid_forget()
+      if messagebox.askyesno('Hide Field', f'Hide Field: `{fieldId}` ?'):
+         field_names.add_ignore(fieldId)
+         items = self.scrollFrame.viewPort.grid_slaves(row=row)
+         for i in items:
+            i.grid_forget()
 
    def setup_rename(self, fieldId, row):
       _id = fieldId
@@ -109,9 +120,13 @@ class MainWindow(Tk):
       return lambda: self.rename_field(_id, _r)
 
    def rename_field(self, fieldId, row):
-      result = simpledialog.askstring('Rename', f'Rename `{fieldId}` to:')
+      result = askRename(fieldId)
       if result is not None:
          field_names.add_rename(fieldId, result)
+         # Rename the existing displayed field
+         for item in self.scrollFrame.viewPort.grid_slaves(row=row, column=2):
+            item.grid_forget()
+         ttk.Label(self.scrollFrame.viewPort, text=result).grid(column=2, row=row, pady=2)
 
    def add_pdf(self):
       messagebox.showinfo(message='Not Implemented')
